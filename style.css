@@ -1,6 +1,8 @@
 body{
     background-color: #793737;
 }
+#unidades{
+    font-size: 16px;
 
 .tablaReporte{
     width: 90%;
