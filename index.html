@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="contenedor">
+        <label for="tel">Ingrese las unidades:</label>
+        <input type="tel" id="unidades">
+        <button onclick="agregarUnidades()">Guardar</button>
+        <button>Exportar a excel</button>
+        
+        <div class="reporte">
+        <div id="resultado"></div>
+        <div id="resumen"></div>
+        </div>
+    </div>
+</body>
+<script>
+    const unidades = {
+        "4": { prefijo: "V", tipo: "Nissan", rejas: 48 },
+        "5": { prefijo: "V", tipo: "Nissan", rejas: 48 },
+        "98": { prefijo: "V", tipo: "Nissan", rejas: 48 },
+        "99": { prefijo: "V", tipo: "Nissan", rejas: 48 },
+        "100": { prefijo: "V", tipo: "Nissan", rejas: 48 },
+        "1": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "2": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "11": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "15": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "18": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "19": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "23": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "29": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "31": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "32": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "35": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "36": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "39": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "43": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "46": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "65": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "70": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "71": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "72": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "73": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "82": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "84": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "85": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "90": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "96": { prefijo: "V", tipo: "Hormiga", rejas: 160 },
+        "25": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "26": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "38": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "44": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "45": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "48": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "49": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "50": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "51": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "52": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "53": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "54": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "58": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "59": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "68": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "75": { prefijo: "V", tipo: "Rabon", rejas: 252 },
+        "47": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "66": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "67": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "76": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "77": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "79": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "80": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "81": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "88": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "89": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "92": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "93": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "94": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "95": { prefijo: "V", tipo: "Torton", rejas: 320 },
+        "013": { prefijo: "J", tipo: "Plana roja", rejas: 400 },
+        "014": { prefijo: "VP", tipo: "Plana roja", rejas: 400 },
+        "015": { prefijo: "VP", tipo: "Plana roja", rejas: 400 },
+        "016": { prefijo: "J", tipo: "Plana roja", rejas: 400 },
+        "017": { prefijo: "VP", tipo: "Plana roja", rejas: 400 },
+        "018": { prefijo: "VP", tipo: "Plana roja", rejas: 400 },
+        "019": { prefijo: "VP", tipo: "Plana roja", rejas: 400 },
+        "020": { prefijo: "VP", tipo: "Plana roja", rejas: 400 },
+        "01": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "02": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "02": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "03": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "04": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "05": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "06": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "07": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "08": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "09": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "010": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "011": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "012": { prefijo: "VP", tipo: "Plana negra", rejas: 480 },
+        "068": { prefijo: "PM", tipo: "Isuzu", rejas: 63 },
+        "13": { prefijo: "V", tipo: "Isuzu", rejas: 98 },
+        "7": { prefijo: "I", tipo: "Hormigon", rejas: 256 },
+    };
+
+    function obtenerFecha(){
+        const hoy = new Date();
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const mes = String(hoy.getMonth()+ 1).padStart(2, '0');
+        const año = hoy.getFullYear().toString().slice(-4);
+        const diaAnterior = String(hoy.getDate()-1).padStart(2, '0');
+        return `${diaAnterior}/${mes}/${año}`;
+    }
+
+    let registros = [];
+
+    function agregarUnidades() {//Esta funcion lee lo que hay en el input y los separa en "turnos"
+        registros = [];
+
+        const texto = document.getElementById('unidades').value.trim();
+        const turnos = texto.split(",");
+        const datos = [];
+        if (texto === "") {
+            alert("Agregar al menos una unidad");
+            return;
+        }
+
+        for (let turno of turnos) {
+            datos.push(turno.trim().split(/\s+/));
+        }
+
+        for (let i = 0; i < datos.length; i++) {
+            for (let j = 0; j < datos[i].length; j++) {//me estanque en el segundo FOR
+                const numeroUnidad = datos[i][j];
+                const informacion = unidades[numeroUnidad];
+
+                if (informacion) {
+                    registros.push({
+                        turno: i + 1,
+                        unidad: numeroUnidad,
+                        prefijo: informacion.prefijo,
+                        tipo: informacion.tipo,
+                        rejas: informacion.rejas,
+                        fecha: obtenerFecha()
+                    });
+                }
+                else {
+                    alert("La unidad " + numeroUnidad + " del turno " + (i + 1) + " no existe");
+                }
+            }
+        }
+
+        mostrarResultado();
+        const resumen = calcularTotales();
+        mostrarResumen(resumen);
+    }
+
+    //esta funcion hace que se muestre el resultado en una tabla
+    function mostrarResultado() {
+        let html = `
+        <table class="tablaReporte">
+        <thead>
+        <tr>
+        <th>Turno</th>
+        <th>Unidad</th>
+        <th>Tipo</th>
+        <th>Rejas</th>
+        <th>Fecha</th>
+        </tr>
+        </thead>
+        <tbody>
+            `;
+
+        for (let registro of registros) {
+            html += `
+            <tr>
+                <td>${registro.turno}</td>
+                <td>${registro.prefijo}-${registro.unidad.padStart(3, "0")}</td>
+                <td>${registro.tipo}</td>
+                <td>${registro.rejas}</td>
+                <td>${registro.fecha}</td>
+            </tr>
+            `;
+        }
+        html += `
+        </tbody>
+        </table>`;
+        document.getElementById('resultado').innerHTML = html;
+        const resumen = calcularTotales();
+    }
+
+    //esto hace que las rejas se sumen por turno y las arroje en un objeto con la cantidad de vehiculos y rejas por turno
+    function calcularTotales() {
+        const totales = {
+            1: {
+                vehiculos: 0,
+                rejas: 0
+            },
+            2: {
+                vehiculos: 0,
+                rejas: 0
+            },
+            3: {
+                vehiculos: 0,
+                rejas: 0
+            }
+        };
+        for (let registro of registros) {
+            totales[registro.turno].vehiculos++;
+            totales[registro.turno].rejas += registro.rejas;
+        }
+        return totales;
+    }
+
+    //esta funcion hace que el resultado de las rejas se sume y las imprima en un div 
+    function mostrarResumen(totales){
+        let html = "";
+        const totalRejas = totales[1].rejas + totales[2].rejas + totales[3].rejas;
+        const totalVehiculo = totales[1].vehiculos + totales[2].vehiculos + totales[3].vehiculos;
+        html +=  `
+        <h3>Resumen de rejas lavadas por turno</h3>
+
+        <div class= "tarjeta"> 
+            <h3>Turno 1</h3>
+            <p>Vehiculos: ${totales[1].vehiculos}</p>
+            <p>Rejas: ${totales[1].rejas}</p>
+            </div>
+
+        <div class= "tarjeta"> 
+            <h3>Turno 2</h3>
+            <p>Vehiculos: ${totales[2].vehiculos}</p>
+            <p>Rejas: ${totales[2].rejas}</p>
+            </div>
+
+        <div class= "tarjeta"> 
+            <h3>Turno 3</h3>
+            <p>Vehiculos: ${totales[3].vehiculos}</p>
+            <p>Rejas: ${totales[3].rejas}</p>
+            </div>
+        <div class="totalGeneral">
+            TOTAL DE REJAS LAVADAS EN TOTAL: ${totalRejas}<br>
+            TOTAL DE VEHICULOS LAVADOS EN TOTAL: ${totalVehiculo}
+        </div> 
+        `;
+        document.getElementById("resumen").innerHTML = html;
+
+        //esta parte es para que el usuario ingrese las unidades y una vez de guardar, el input se limpie
+        document.getElementById("unidades").value = "";
+        document.getElementById("unidades").focus();
+    }
+
+</script>
+</html>

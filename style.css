@@ -1,0 +1,62 @@
+body{
+    background-color: #793737;
+}
+
+.tablaReporte{
+    width: 90%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tablaReporte th{
+    background-color: #1f6e43;
+    border: 1px solid #000000;
+    color: white;
+    padding: 5px 10px;
+}
+.tablaReporte td{
+    padding: 5px;
+    border: 1px solid #000000;
+    text-align: center;
+}
+.tablaReporte tr:nth-child(even){
+    background: #d4acac;
+}
+.tablaReporte tr:hover{
+    background: #d9f5e3;
+}
+
+#resumen{
+    display:flex;
+    gap:20px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:25px;
+}
+.tarjeta{
+    width: 200px;
+    background: rgb(169, 122, 196);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0, .15);
+    text-align: center;
+}
+.tarjeta h3{
+    margin-top: 0;
+    color: #1f6e43;
+}
+.tarjeta p{
+    font-size: 18px;
+    margin: 12px 0;
+}
+.totalGeneral{
+    width:100%;
+    max-width:500px;
+    margin:auto;
+    margin-top:25px;
+    background:#1f6e43;
+    color:white;
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+}
