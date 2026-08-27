@@ -1,65 +1,380 @@
-body{
-    background-color: #793737;
-}
-#unidades{
-    font-size: 16px;
+/* ==========================================================
+   Reporte de Lavado de Rejas — estilos
+   Paleta: fondo neutro claro, tarjetas blancas, acentos por turno
+   ========================================================== */
+
+:root {
+  --bg: #eef1f4;
+  --panel: #ffffff;
+  --line: #dde2e8;
+  --text: #1f2937;
+  --muted: #6b7280;
+
+  --navy: #16232e;
+  --navy-2: #223245;
+
+  --turno1: #2563eb;   /* azul */
+  --turno2: #d97706;   /* ámbar */
+  --turno3: #16a34a;   /* verde */
+
+  --danger: #dc2626;
+  --radius: 10px;
 }
 
-.tablaReporte{
-    width: 90%;
-    border-collapse: collapse;
-    margin-top: 20px;
+* {
+  box-sizing: border-box;
 }
 
-.tablaReporte th{
-    background-color: #1f6e43;
-    border: 1px solid #000000;
-    color: white;
-    padding: 5px 10px;
-}
-.tablaReporte td{
-    padding: 5px;
-    border: 1px solid #000000;
-    text-align: center;
-}
-.tablaReporte tr:nth-child(even){
-    background: #d4acac;
-}
-.tablaReporte tr:hover{
-    background: #d9f5e3;
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  padding: 24px 14px 60px;
 }
 
-#resumen{
-    display:flex;
-    gap:20px;
-    justify-content:center;
-    flex-wrap:wrap;
-    margin-top:25px;
+.contenedor {
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px 22px 30px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
 }
-.tarjeta{
-    width: 200px;
-    background: rgb(169, 122, 196);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0, .15);
-    text-align: center;
+
+/* ---------- Encabezado ---------- */
+.encabezado {
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
-.tarjeta h3{
-    margin-top: 0;
-    color: #1f6e43;
+
+.encabezado h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
 }
-.tarjeta p{
-    font-size: 18px;
-    margin: 12px 0;
+
+.subtitulo {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
 }
-.totalGeneral{
-    width:100%;
-    max-width:500px;
-    margin:auto;
-    margin-top:25px;
-    background:#1f6e43;
-    color:white;
-    border-radius:15px;
-    padding:20px;
-    text-align:center;
+
+/* ---------- Formulario ---------- */
+label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 16px 0 6px;
+}
+
+label:first-of-type {
+  margin-top: 0;
+}
+
+input[type="date"],
+input[type="tel"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14.5px;
+}
+
+input:focus,
+select:focus,
+button:focus {
+  outline: 2px solid var(--turno1);
+  outline-offset: 1px;
+}
+
+input[type="tel"]::placeholder {
+  font-family: 'Inter', sans-serif;
+}
+
+/* ---------- Botones ---------- */
+button {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  cursor: pointer;
+  margin-top: 14px;
+  margin-right: 10px;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Botón "Guardar" */
+button[onclick="agregarUnidades()"] {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* Botón "Exportar a excel" */
+button[onclick="abrirPanelExportar()"] {
+  background: var(--turno2);
+  color: #fff;
+}
+
+/* ---------- Panel de exportación ---------- */
+#panelExportar {
+  margin-top: 18px;
+  padding: 16px;
+  background: #f8f9fb;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+#panelExportar label {
+  display: inline-block;
+  margin: 10px 8px 4px 0;
+}
+
+#panelExportar select,
+#panelExportar input[type="number"] {
+  display: inline-block;
+  width: auto;
+  margin-right: 14px;
+}
+
+#opcionQuincena {
+  display: inline;
+}
+
+#panelExportar button {
+  display: inline-block;
+}
+
+#panelExportar button[onclick="generarExcelDesdeFormulario()"] {
+  background: var(--turno3);
+  color: #fff;
+}
+
+#panelExportar button[onclick="cerrarPanelExportar()"] {
+  background: #e5e7eb;
+  color: var(--text);
+}
+
+/* ---------- Resultado agrupado por turno ---------- */
+.reporte {
+  margin-top: 26px;
+}
+
+.vacio {
+  color: var(--muted);
+  font-size: 13.5px;
+  font-style: italic;
+  padding: 14px 0;
+}
+
+details.grupoTurno {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--muted);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+details.grupoTurno.turno1 { border-left-color: var(--turno1); }
+details.grupoTurno.turno2 { border-left-color: var(--turno2); }
+details.grupoTurno.turno3 { border-left-color: var(--turno3); }
+
+details.grupoTurno summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #fbfcfd;
+}
+
+details.grupoTurno summary::-webkit-details-marker {
+  display: none;
+}
+
+details.grupoTurno summary::before {
+  content: '▸';
+  color: var(--muted);
+  margin-right: 8px;
+  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+
+details.grupoTurno[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.turnoTitulo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+}
+
+details.turno1 .turnoTitulo::after { content: ''; }
+
+.turnoBadge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  background: #eef1f4;
+  border: 1px solid var(--line);
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ---------- Tabla ---------- */
+.tablaReporte {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+}
+
+.tablaReporte thead th {
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding: 8px 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.tablaReporte tbody td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tablaReporte tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tablaReporte tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+
+/* ---------- Resumen (tarjetas por turno) ---------- */
+#resumen h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--navy);
+  margin: 26px 0 12px;
+}
+
+#resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+#resumen h3 {
+  width: 100%;
+}
+
+.tarjeta {
+  flex: 1 1 150px;
+  background: #fbfcfd;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--muted);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.tarjeta:nth-of-type(1) { border-top-color: var(--turno1); }
+.tarjeta:nth-of-type(2) { border-top-color: var(--turno2); }
+.tarjeta:nth-of-type(3) { border-top-color: var(--turno3); }
+
+.tarjeta h3 {
+  margin: 0 0 6px !important;
+  font-size: 15px !important;
+}
+
+.tarjeta p {
+  margin: 2px 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.totalGeneral {
+  flex: 1 1 100%;
+  margin-top: 4px;
+  background: var(--navy);
+  color: #fff;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .contenedor {
+    padding: 18px 14px 26px;
+  }
+
+  .encabezado h1 {
+    font-size: 21px;
+  }
+
+  #panelExportar label,
+  #panelExportar select,
+  #panelExportar input[type="number"] {
+    display: block;
+    width: 100%;
+    margin: 6px 0;
+  }
+
+  #opcionQuincena {
+    display: block;
+  }
+
+  button {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .tablaReporte {
+    font-size: 12.5px;
+  }
+
+  .tablaReporte thead th,
+  .tablaReporte tbody td {
+    padding: 7px 8px;
+  }
 }
