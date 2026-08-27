@@ -5,16 +5,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Reporte-Grafica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 
 <body>
     <div class="contenedor">
+        <header class="encabezado">
+            <h1>Reporte de Lavado de Rejas</h1>
+            <p class="subtitulo">Captura diaria por turno</p>
+        </header>
+
+        <label for="fecha"> Fecha del reporte: </label>
+        <input type="date" id="fecha">
         <label for="tel">Ingrese las unidades:</label>
-        <input type="text" id="unidades">
+        <input type="tel" id="unidades">
         <button onclick="agregarUnidades()">Guardar</button>
-        <button>Exportar a excel</button>
-        
+        <button onclick="abrirPanelExportar()">Exportar a excel</button>
+
+        <div id="panelExportar" style="display:none;">
+            <label for="tipoReporte">Tipo de reporte:</label>
+            <select id="tipoReporte" onchange="actualizarPanelExportar()">
+                <option value="quincenal">Quincenal</option>
+                <option value="mensual">Mensual</option>
+            </select>
+
+            <label for="mesReporte">Mes:</label>
+            <select id="mesReporte">
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+
+            <label for="anioReporte">Año:</label>
+            <input type="number" id="anioReporte" style="width:80px;">
+
+            <span id="opcionQuincena">
+                <label for="quincenaReporte">Quincena:</label>
+                <select id="quincenaReporte">
+                    <option value="1">Del 1 al 15</option>
+                    <option value="2">Del 16 al fin de mes</option>
+                </select>
+            </span>
+
+            <button onclick="generarExcelDesdeFormulario()">Generar Excel</button>
+            <button onclick="cerrarPanelExportar()">Cancelar</button>
+        </div>
+
         <div class="reporte">
         <div id="resultado"></div>
         <div id="resumen"></div>
@@ -110,12 +159,8 @@
     };
 
     function obtenerFecha(){
-        const hoy = new Date();
-        const dia = String(hoy.getDate()).padStart(2, '0');
-        const mes = String(hoy.getMonth()+ 1).padStart(2, '0');
-        const año = hoy.getFullYear().toString().slice(-4);
-        const diaAnterior = String(hoy.getDate()-1).padStart(2, '0');
-        return `${diaAnterior}/${mes}/${año}`;
+        const fechaInput = document.getElementById('fecha').value;
+        return fechaInput;
     }
 
     let registros = [];
@@ -142,12 +187,12 @@
 
                 if (informacion) {
                     registros.push({
+                        fecha: obtenerFecha(),
                         turno: i + 1,
+                        tipo: informacion.tipo,
                         unidad: numeroUnidad,
                         prefijo: informacion.prefijo,
-                        tipo: informacion.tipo,
                         rejas: informacion.rejas,
-                        fecha: obtenerFecha()
                     });
                 }
                 else {
@@ -159,40 +204,98 @@
         mostrarResultado();
         const resumen = calcularTotales();
         mostrarResumen(resumen);
+        guardarReporteDiario(obtenerFecha(), registros, resumen);
+    }
+
+    // ----- Persistencia en localStorage -----
+    const CLAVE_STORAGE = "reportesDiarios";
+
+    function cargarReportesDiarios() {
+        try {
+            const raw = localStorage.getItem(CLAVE_STORAGE);
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            console.error("Error leyendo localStorage", e);
+            return {};
+        }
+    }
+
+    function guardarReportesDiarios(reportes) {
+        try {
+            localStorage.setItem(CLAVE_STORAGE, JSON.stringify(reportes));
+        } catch (e) {
+            console.error("Error guardando en localStorage", e);
+            alert("No se pudo guardar el reporte en este dispositivo.");
+        }
+    }
+
+    // Guarda (o reemplaza) el reporte del día indicado
+    function guardarReporteDiario(fecha, registrosDelDia, totalesDelDia) {
+        if (!fecha) {
+            alert("Selecciona una fecha antes de guardar el reporte.");
+            return;
+        }
+        const reportes = cargarReportesDiarios();
+        reportes[fecha] = {
+            registros: registrosDelDia,
+            totales: totalesDelDia
+        };
+        guardarReportesDiarios(reportes);
     }
 
     //esta funcion hace que se muestre el resultado en una tabla
+    // Agrupa los registros por turno para que no se muestren como una sola lista larga
     function mostrarResultado() {
-        let html = `
-        <table class="tablaReporte">
-        <thead>
-        <tr>
-        <th>Turno</th>
-        <th>Unidad</th>
-        <th>Tipo</th>
-        <th>Rejas</th>
-        <th>Fecha</th>
-        </tr>
-        </thead>
-        <tbody>
+        const grupos = { 1: [], 2: [], 3: [] };
+        for (let registro of registros) {
+            grupos[registro.turno].push(registro);
+        }
+
+        let html = "";
+        for (const turno of [1, 2, 3]) {
+            const filas = grupos[turno];
+            if (filas.length === 0) continue;
+
+            const subtotalRejas = filas.reduce((acc, r) => acc + r.rejas, 0);
+            const etiquetaUnidades = filas.length === 1 ? "unidad" : "unidades";
+
+            html += `
+            <details class="grupoTurno turno${turno}" open>
+                <summary>
+                    <span class="turnoTitulo">Turno ${turno}</span>
+                    <span class="turnoBadge">${filas.length} ${etiquetaUnidades} &middot; ${subtotalRejas} rejas</span>
+                </summary>
+                <table class="tablaReporte">
+                <thead>
+                <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Unidad</th>
+                <th>Rejas</th>
+                </tr>
+                </thead>
+                <tbody>
             `;
 
-        for (let registro of registros) {
+            for (let registro of filas) {
+                html += `
+                <tr>
+                    <td>${registro.fecha}</td>
+                    <td>${registro.tipo}</td>
+                    <td>${registro.prefijo}-${registro.unidad.padStart(3, "0")}</td>
+                    <td>${registro.rejas}</td>
+                </tr>
+                `;
+            }
+
             html += `
-            <tr>
-                <td>${registro.turno}</td>
-                <td>${registro.prefijo}-${registro.unidad.padStart(3, "0")}</td>
-                <td>${registro.tipo}</td>
-                <td>${registro.rejas}</td>
-                <td>${registro.fecha}</td>
-            </tr>
+                </tbody>
+                </table>
+            </details>
             `;
         }
-        html += `
-        </tbody>
-        </table>`;
-        document.getElementById('resultado').innerHTML = html;
-        const resumen = calcularTotales();
+
+        document.getElementById('resultado').innerHTML = html || '<p class="vacio">Aún no hay unidades registradas para esta fecha.</p>';
     }
 
     //esto hace que las rejas se sumen por turno y las arroje en un objeto con la cantidad de vehiculos y rejas por turno
@@ -249,6 +352,233 @@
         </div> 
         `;
         document.getElementById("resumen").innerHTML = html;
+
+        //esta parte es para que el usuario ingrese las unidades y una vez de guardar, el input se limpie
+    }
+
+    // ================= EXPORTAR A EXCEL =================
+
+    function abrirPanelExportar() {
+        const hoy = new Date();
+        document.getElementById("anioReporte").value = hoy.getFullYear();
+        document.getElementById("mesReporte").value = String(hoy.getMonth() + 1);
+        document.getElementById("panelExportar").style.display = "block";
+        actualizarPanelExportar();
+    }
+
+    function cerrarPanelExportar() {
+        document.getElementById("panelExportar").style.display = "none";
+    }
+
+    // Muestra u oculta el selector de quincena según el tipo de reporte elegido
+    function actualizarPanelExportar() {
+        const tipo = document.getElementById("tipoReporte").value;
+        document.getElementById("opcionQuincena").style.display = (tipo === "quincenal") ? "inline" : "none";
+    }
+
+    function pad2(n) {
+        return String(n).padStart(2, "0");
+    }
+
+    // Calcula fecha de inicio y fin (strings "YYYY-MM-DD") según el periodo elegido
+    function calcularRangoFechas(tipo, anio, mes, quincena) {
+        const diasEnMes = new Date(anio, mes, 0).getDate();
+        if (tipo === "mensual") {
+            return {
+                inicio: `${anio}-${pad2(mes)}-01`,
+                fin: `${anio}-${pad2(mes)}-${pad2(diasEnMes)}`
+            };
+        }
+        // quincenal
+        if (quincena === "1") {
+            return {
+                inicio: `${anio}-${pad2(mes)}-01`,
+                fin: `${anio}-${pad2(mes)}-15`
+            };
+        }
+        return {
+            inicio: `${anio}-${pad2(mes)}-16`,
+            fin: `${anio}-${pad2(mes)}-${pad2(diasEnMes)}`
+        };
+    }
+
+    // Suma vehículos y rejas de los 3 turnos de un día
+    function totalDelDia(totales) {
+        let vehiculos = 0, rejas = 0;
+        for (const turno of [1, 2, 3]) {
+            if (totales[turno]) {
+                vehiculos += totales[turno].vehiculos;
+                rejas += totales[turno].rejas;
+            }
+        }
+        return { vehiculos, rejas };
+    }
+
+    function generarExcelDesdeFormulario() {
+        const tipo = document.getElementById("tipoReporte").value;
+        const anio = parseInt(document.getElementById("anioReporte").value, 10);
+        const mes = parseInt(document.getElementById("mesReporte").value, 10);
+        const quincena = document.getElementById("quincenaReporte").value;
+
+        if (!anio || !mes) {
+            alert("Indica el mes y el año del reporte.");
+            return;
+        }
+
+        const rango = calcularRangoFechas(tipo, anio, mes, quincena);
+        const todosLosReportes = cargarReportesDiarios();
+        const todasLasFechas = Object.keys(todosLosReportes).sort();
+
+        if (todasLasFechas.length === 0) {
+            alert("No hay ningún reporte guardado todavía.");
+            return;
+        }
+
+        // Fechas dentro del periodo elegido: solo se usan para el resumen y la gráfica
+        const fechasEnRango = todasLasFechas.filter(f => f >= rango.inicio && f <= rango.fin);
+
+        const resumenPorDia = fechasEnRango.map(fecha => {
+            const totalDia = totalDelDia(todosLosReportes[fecha].totales);
+            return { fecha, ...totalDia };
+        });
+
+        // Detalle completo: TODOS los datos que el usuario ha ingresado hasta ahora,
+        // sin importar si caen dentro del periodo elegido para la gráfica.
+        const detalleCompleto = [];
+        for (const fecha of todasLasFechas) {
+            for (const registro of todosLosReportes[fecha].registros) {
+                detalleCompleto.push(registro);
+            }
+        }
+
+        const nombrePeriodo = (tipo === "mensual")
+            ? `Mensual_${pad2(mes)}-${anio}`
+            : `Quincena${quincena}_${pad2(mes)}-${anio}`;
+
+        if (resumenPorDia.length === 0) {
+            alert("No hay datos en el periodo elegido para la gráfica; aun así se exportará todo el historial capturado.");
+            construirExcel(resumenPorDia, detalleCompleto, null, nombrePeriodo);
+            return;
+        }
+
+        generarImagenGrafica(resumenPorDia, (imagenBase64) => {
+            construirExcel(resumenPorDia, detalleCompleto, imagenBase64, nombrePeriodo);
+        });
+    }
+
+    // Dibuja la gráfica de barras (rejas por día) en un canvas oculto y regresa la imagen en base64
+    function generarImagenGrafica(resumenPorDia, callback) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 800;
+        canvas.height = 400;
+
+        new Chart(canvas.getContext("2d"), {
+            type: "bar",
+            data: {
+                labels: resumenPorDia.map(r => r.fecha.slice(5).split("-").reverse().join("/")),
+                datasets: [
+                    {
+                        label: "Rejas lavadas",
+                        data: resumenPorDia.map(r => r.rejas),
+                        backgroundColor: "#4a90d9",
+                        yAxisID: "yRejas"
+                    },
+                    {
+                        label: "Vehículos",
+                        data: resumenPorDia.map(r => r.vehiculos),
+                        backgroundColor: "#d97706",
+                        yAxisID: "yVehiculos"
+                    }
+                ]
+            },
+            options: {
+                animation: false,
+                responsive: false,
+                plugins: {
+                    title: { display: true, text: "Rejas y vehículos por día" },
+                    legend: { display: true }
+                },
+                scales: {
+                    yRejas: {
+                        type: "linear",
+                        position: "left",
+                        beginAtZero: true,
+                        title: { display: true, text: "Rejas" }
+                    },
+                    yVehiculos: {
+                        type: "linear",
+                        position: "right",
+                        beginAtZero: true,
+                        title: { display: true, text: "Vehículos" },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+
+        // Sin animación, el canvas ya está listo en el siguiente frame
+        requestAnimationFrame(() => {
+            callback(canvas.toDataURL("image/png"));
+        });
+    }
+
+    function construirExcel(resumenPorDia, detalleCompleto, imagenBase64, nombrePeriodo) {
+        const workbook = new ExcelJS.Workbook();
+
+        // Hoja de resumen
+        const hojaResumen = workbook.addWorksheet("Resumen");
+        hojaResumen.columns = [
+            { header: "Fecha", key: "fecha", width: 14 },
+            { header: "Vehículos", key: "vehiculos", width: 12 },
+            { header: "Rejas", key: "rejas", width: 12 }
+        ];
+        resumenPorDia.forEach(r => hojaResumen.addRow(r));
+
+        let totalVehiculos = 0, totalRejas = 0;
+        resumenPorDia.forEach(r => { totalVehiculos += r.vehiculos; totalRejas += r.rejas; });
+        const filaTotal = hojaResumen.addRow({ fecha: "TOTAL", vehiculos: totalVehiculos, rejas: totalRejas });
+        filaTotal.font = { bold: true };
+
+        const imagenId = workbook.addImage({
+            base64: imagenBase64,
+            extension: "png"
+        });
+        hojaResumen.addImage(imagenId, {
+            tl: { col: 4, row: 1 },
+            ext: { width: 520, height: 260 }
+        });
+
+        // Hoja de detalle
+        const hojaDetalle = workbook.addWorksheet("Detalle");
+        hojaDetalle.columns = [
+            { header: "Fecha", key: "fecha", width: 14 },
+            { header: "Turno", key: "turno", width: 8 },
+            { header: "Tipo", key: "tipo", width: 16 },
+            { header: "Unidad", key: "unidadTexto", width: 12 },
+            { header: "Rejas", key: "rejas", width: 10 }
+        ];
+        detalleCompleto.forEach(registro => {
+            hojaDetalle.addRow({
+                fecha: registro.fecha,
+                turno: registro.turno,
+                tipo: registro.tipo,
+                unidadTexto: `${registro.prefijo}-${registro.unidad.padStart(3, "0")}`,
+                rejas: registro.rejas
+            });
+        });
+
+        workbook.xlsx.writeBuffer().then(buffer => {
+            const blob = new Blob([buffer], { type: "application/octet-stream" });
+            const url = URL.createObjectURL(blob);
+            const enlace = document.createElement("a");
+            enlace.href = url;
+            enlace.download = `Reporte_${nombrePeriodo}.xlsx`;
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
+            URL.revokeObjectURL(url);
+            cerrarPanelExportar();
+        });
     }
 
 </script>
